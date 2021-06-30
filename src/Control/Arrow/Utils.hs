@@ -14,7 +14,7 @@ import Control.Arrow
     ( returnA, (>>>), Arrow((***), arr), ArrowChoice )
 import Data.Foldable (traverse_)
 import Data.Maybe ( fromJust )
-import Data.Vector.Sized ( fromList, toList, Vector ) 
+import Data.Vector.Sized ( fromList, toList, Vector )
 import GHC.TypeLits ( KnownNat )
 
 
@@ -60,5 +60,3 @@ whenA cell = proc (b, input) -> do
 
 unlessA :: ArrowChoice a => a b () -> a (Bool, b) ()
 unlessA cell = arr not *** arr id >>> whenA cell
-
-
