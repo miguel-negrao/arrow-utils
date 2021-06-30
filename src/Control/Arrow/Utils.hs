@@ -40,16 +40,16 @@ sequenceArr :: (Traversable t, Arrow a1) => t (a1 b a2) -> a1 b (t a2)
 sequenceArr xs = unSameInputArrow $ traverse SameInputArrow xs
 
 sequenceArrVec :: (Arrow a, KnownNat n) => Vector n (a b c) -> a (Vector n b) (Vector n c)
-sequenceArrVec cells = arr toList >>> sequenceArrList (toList cells) >>> arr (fromJust . fromList)
+sequenceArrVec cells = arr toList >>> sequenceArrListUnsafe (toList cells) >>> arr (fromJust . fromList)
 
 -- not safe, doesn't check size of lists
 -- when used in sequenceArrVec it is safe as the size of the
 -- vectors are all the same
-sequenceArrList :: Arrow a => [a b1 b2] -> a [b1] [b2]
-sequenceArrList [] = arr (const [])
-sequenceArrList (x:xs) = proc (y:ys) -> do
+sequenceArrListUnsafe :: Arrow a => [a b1 b2] -> a [b1] [b2]
+sequenceArrListUnsafe [] = arr (const [])
+sequenceArrListUnsafe (x:xs) = proc (y:ys) -> do
   xres <- x -< y
-  xsres <- sequenceArrList xs -< ys
+  xsres <- sequenceArrListUnsafe xs -< ys
   returnA -< (xres:xsres)
 
 whenA :: ArrowChoice a => a b () -> a (Bool, b) ()
