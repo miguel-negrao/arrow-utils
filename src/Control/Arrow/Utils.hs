@@ -6,6 +6,7 @@ module Control.Arrow.Utils (
   , sequenceArr_
   , sequenceArr
   , sequenceArrVec
+  , sequenceArrList
   , whenA
   , unlessA
 ) where
@@ -51,6 +52,17 @@ sequenceArrListUnsafe (x:xs) = proc (y:ys) -> do
   xres <- x -< y
   xsres <- sequenceArrListUnsafe xs -< ys
   returnA -< (xres:xsres)
+
+-- | Fans each input from @[b1]@ to a separate arrow from the given list.
+--   The output list has length of the minimum of the input list length and the arrow list length.
+sequenceArrList :: (Arrow a, ArrowChoice a) => [a b c] -> a [b] [c]
+sequenceArrList [] = arr $ const []
+sequenceArrList (a : as) = proc bs' -> case bs' of
+  [] -> returnA -< []
+  b : bs -> do
+    c <- a -< b
+    cs <- sequenceArrList as -< bs
+    returnA -< c : cs
 
 whenA :: ArrowChoice a => a b () -> a (Bool, b) ()
 whenA cell = proc (b, input) -> do
