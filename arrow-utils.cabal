@@ -1,0 +1,28 @@
+cabal-version:      >=1.10
+name:               arrow-utils
+version:            0.1.0.0
+synopsis: functions for working with arrows
+description:
+ arrow-utils provides useful functions and type classes for working with arrows. It provides functions similar to sequenceA.
+
+
+license:            BSD3
+license-file:       LICENSE
+author:             Miguel Negrão
+maintainer:         miguel.negrao@friendlyvirus.org
+homepage:           https://github.com/miguel-negrao/
+category:           Arrows, Control, Combinators
+build-type:         Simple
+extra-source-files: CHANGELOG.md
+
+library
+    exposed-modules:
+        Control.Arrow.Utils
+
+    other-extensions:
+        Arrows
+    build-depends:
+        base >= 4.7
+        , vector-sized
+    hs-source-dirs:   src
+    default-language: Haskell2010
