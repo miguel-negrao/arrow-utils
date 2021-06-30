@@ -30,7 +30,7 @@ instance (Arrow a) => Functor (SameInputArrow a b) where
 
 -- | @'<*>'@ runs the arrows in parallel
 instance (Arrow a) => Applicative (SameInputArrow a b) where
-  pure c = SameInputArrow $ arr (const c)
+  pure c = SameInputArrow $ constantly c
   f <*> a = SameInputArrow $ proc input -> do
     fres <- unSameInputArrow f -< input
     ares <- unSameInputArrow a -< input
@@ -51,7 +51,7 @@ sequenceArrVec cells = arr toList >>> sequenceArrListUnsafe (toList cells) >>> a
 -- when used in sequenceArrVec it is safe as the size of the
 -- vectors are all the same
 sequenceArrListUnsafe :: Arrow a => [a b1 b2] -> a [b1] [b2]
-sequenceArrListUnsafe [] = arr (const [])
+sequenceArrListUnsafe [] = constantly []
 sequenceArrListUnsafe (x:xs) = proc (y:ys) -> do
   xres <- x -< y
   xsres <- sequenceArrListUnsafe xs -< ys
@@ -60,7 +60,7 @@ sequenceArrListUnsafe (x:xs) = proc (y:ys) -> do
 -- | Fans each input from @[b1]@ to a separate arrow from the given list.
 --   The output list has length of the minimum of the input list length and the arrow list length.
 sequenceArrList :: (Arrow a, ArrowChoice a) => [a b c] -> a [b] [c]
-sequenceArrList [] = arr $ const []
+sequenceArrList [] = constantly []
 sequenceArrList (a : as) = proc bs' -> case bs' of
   [] -> returnA -< []
   b : bs -> do
@@ -72,7 +72,7 @@ whenA :: ArrowChoice a => a b () -> a (Bool, b) ()
 whenA cell = proc (b, input) -> do
   if b
     then cell -< input
-    else arr (const ()) -< input
+    else constantly () -< input
 
 unlessA :: ArrowChoice a => a b () -> a (Bool, b) ()
 unlessA cell = arr not *** arr id >>> whenA cell
