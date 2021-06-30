@@ -9,6 +9,7 @@ module Control.Arrow.Utils (
   , sequenceArrList
   , whenA
   , unlessA
+  , constantly
 ) where
 
 import Control.Arrow
@@ -72,3 +73,7 @@ whenA cell = proc (b, input) -> do
 
 unlessA :: ArrowChoice a => a b () -> a (Bool, b) ()
 unlessA cell = arr not *** arr id >>> whenA cell
+
+-- | Always output the given value.
+constantly :: Arrow a => b -> a any b
+constantly = arr . const
