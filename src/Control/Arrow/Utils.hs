@@ -1,8 +1,7 @@
 {-# LANGUAGE Arrows #-}
 
 module Control.Arrow.Utils (
-    SameInputArrow
-  , unSameInputArrow
+    SameInputArrow(..)
   , sequenceArr_
   , sequenceArr
   , sequenceArrVec
