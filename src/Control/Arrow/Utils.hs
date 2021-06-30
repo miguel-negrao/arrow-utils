@@ -20,14 +20,16 @@ import Data.Vector.Sized ( fromList, toList, Vector )
 import GHC.TypeLits ( KnownNat )
 
 
--- | Wrap the Arrow in a newtype in order to create new class instances
+-- | Wrap the Arrow in a newtype in order to create new class instances.
+--   This is a generalisation of 'ArrowMonad',
+--   which is isomorphic to @'SameInputArrow' a () c@.
 newtype SameInputArrow a b c = SameInputArrow { unSameInputArrow :: a b c }
 
--- | A group of arrows which all take the same input is a Functor
+-- | @'fmap' f@ postcomposes with @f@
 instance (Arrow a) => Functor (SameInputArrow a b) where
   fmap f a = SameInputArrow (unSameInputArrow a >>> arr f)
 
--- | A group of arrows which all take the same input is an Applicative
+-- | @'<*>'@ runs the arrows in parallel
 instance (Arrow a) => Applicative (SameInputArrow a b) where
   pure c = SameInputArrow $ arr (const c)
   f <*> a = SameInputArrow $ proc input -> do
@@ -35,9 +37,11 @@ instance (Arrow a) => Applicative (SameInputArrow a b) where
     ares <- unSameInputArrow a -< input
     returnA -< fres ares
 
+-- | Like 'sequenceArr', but discard the results.
 sequenceArr_ :: (Foldable t, Arrow a) => t (a b1 b2) -> a b1 ()
 sequenceArr_ xs = unSameInputArrow $ traverse_ SameInputArrow xs
 
+-- | Run all arrows in the given 'Traversable', collecting the results.
 sequenceArr :: (Traversable t, Arrow a1) => t (a1 b a2) -> a1 b (t a2)
 sequenceArr xs = unSameInputArrow $ traverse SameInputArrow xs
 
