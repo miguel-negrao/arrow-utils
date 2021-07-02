@@ -2,6 +2,8 @@
 
 module Control.Arrow.Utils (
     SameInputArrow(..)
+  , traverseArr
+  , traverseArr_
   , sequenceArr_
   , sequenceArr
   , sequenceArrVec
@@ -36,15 +38,27 @@ instance (Arrow a) => Applicative (SameInputArrow a b) where
     ares <- unSameInputArrow a -< input
     returnA -< fres ares
 
+-- | Creates arrows using f, then runs all arrows in the given 'Traversable',
+-- discarding the results.
+traverseArr_ :: (Foldable t, Arrow a) => (x -> a b c) -> t x -> a b ()
+traverseArr_ f xs = unSameInputArrow $ traverse_ (SameInputArrow . f) xs
+
+-- | Creates arrows using f, then runs all arrows in the given 'Traversable',
+-- collecting the results.
+--
+--   @traverseArr (+) [1,10] 1 == [2,11]@
+traverseArr :: (Traversable t, Arrow a) => (x -> a b c) -> t x -> a b (t c)
+traverseArr f xs = unSameInputArrow $ traverse (SameInputArrow . f) xs
+
 -- | Like 'sequenceArr', but discard the results.
 sequenceArr_ :: (Foldable t, Arrow a) => t (a b any) -> a b ()
-sequenceArr_ xs = unSameInputArrow $ traverse_ SameInputArrow xs
+sequenceArr_ = traverseArr_ id
 
 -- | Run all arrows in the given 'Traversable', collecting the results.
 --
 --   @sequenceArr [(+1), (+10)] 1 == [2,11]@
 sequenceArr :: (Traversable t, Arrow a) => t (a b c) -> a b (t c)
-sequenceArr xs = unSameInputArrow $ traverse SameInputArrow xs
+sequenceArr = traverseArr id
 
 -- | Fans each input from @Vector n b@ to a separate arrow from the given vector.
 --
