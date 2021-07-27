@@ -6,8 +6,8 @@ module Control.Arrow.Utils (
   , traverseArr_
   , sequenceArr_
   , sequenceArr
-  , sequenceArrVec
-  , sequenceArrList
+  , zipSequenceArrVec
+  , zipSequenceArrList
   , whenArr
   , unlessArr
   , constantly
@@ -63,17 +63,17 @@ sequenceArr = traverseArr id
 -- | Fans each input from @Vector n b@ to a separate arrow from the given vector.
 --
 --   @sequenceArrVec (Vec.generate ((+).fromIntegral) :: Vector 5 (Int -> Int)) (Vec.replicate 1 :: Vector 5 Int) == Vector [1,2,3,4,5]@
-sequenceArrVec :: (Arrow a, KnownNat n) => Vector n (a b c) -> a (Vector n b) (Vector n c)
-sequenceArrVec cells = arr toList >>> sequenceArrListUnsafe (toList cells) >>> arr (fromJust . fromList)
+zipSequenceArrVec :: (Arrow a, KnownNat n) => Vector n (a b c) -> a (Vector n b) (Vector n c)
+zipSequenceArrVec cells = arr toList >>> zipSequenceArrListUnsafe (toList cells) >>> arr (fromJust . fromList)
 
 -- Not safe, doesn't check size of the lists.
 -- When used in sequenceArrVec it is safe as the size of the
 -- vectors are all the same. Not to export.
-sequenceArrListUnsafe :: Arrow a => [a b c] -> a [b] [c]
-sequenceArrListUnsafe [] = constantly []
-sequenceArrListUnsafe (x:xs) = proc (y:ys) -> do
+zipSequenceArrListUnsafe :: Arrow a => [a b c] -> a [b] [c]
+zipSequenceArrListUnsafe [] = constantly []
+zipSequenceArrListUnsafe (x:xs) = proc (y:ys) -> do
   xres <- x -< y
-  xsres <- sequenceArrListUnsafe xs -< ys
+  xsres <- zipSequenceArrListUnsafe xs -< ys
   returnA -< (xres:xsres)
 
 -- | Fans each input from @[b]@ to a separate arrow from the given list.
@@ -83,13 +83,13 @@ sequenceArrListUnsafe (x:xs) = proc (y:ys) -> do
 --  sequenceArrList [(+1), (+10)] [1,2] == [2,12]
 --  sequenceArrList [(+1), (+10)] [1]   == [2]
 --  sequenceArrList [(+1)] [1,2,3,4]    == [2]@
-sequenceArrList :: (Arrow a, ArrowChoice a) => [a b c] -> a [b] [c]
-sequenceArrList [] = constantly []
-sequenceArrList (a : as) = proc bs' -> case bs' of
+zipSequenceArrList :: (Arrow a, ArrowChoice a) => [a b c] -> a [b] [c]
+zipSequenceArrList [] = constantly []
+zipSequenceArrList (a : as) = proc bs' -> case bs' of
   [] -> returnA -< []
   b : bs -> do
     c <- a -< b
-    cs <- sequenceArrList as -< bs
+    cs <- zipSequenceArrList as -< bs
     returnA -< c : cs
 
 -- | Similar to @'when'@ for @'Applicative'@. Relevant for

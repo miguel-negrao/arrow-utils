@@ -9,7 +9,7 @@ import Test.Framework.Providers.QuickCheck2 ( testProperty )
 -- QuickCheck
 import Test.QuickCheck ( (===) )
 
-import Control.Arrow.Utils ( sequenceArrList )
+import Control.Arrow.Utils ( zipSequenceArrList )
 
 main :: IO ()
 main = defaultMain tests
@@ -20,7 +20,7 @@ tests = [
     [ testProperty "length of arrows"
       $ \(xs :: [Integer]) (ys :: [Integer])-> let
          funcList = fmap (const (+1)) ys
-         res = sequenceArrList funcList xs
+         res = zipSequenceArrList funcList xs
         in
           length res === min (length xs) (length ys)                           
     ]
