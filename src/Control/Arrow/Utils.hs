@@ -38,7 +38,7 @@ instance (Arrow a) => Applicative (SameInputArrow a b) where
     ares <- unSameInputArrow a -< input
     returnA -< fres ares
 
--- | Creates arrows using f, then runs all arrows in the given 'Traversable',
+-- | Creates arrows using f, then runs all arrows in the given 'Foldable',
 -- discarding the results.
 traverseArr_ :: (Foldable t, Arrow a) => (x -> a b c) -> t x -> a b ()
 traverseArr_ f xs = unSameInputArrow $ traverse_ (SameInputArrow . f) xs
