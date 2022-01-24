@@ -2,3 +2,6 @@ resolver: lts-18.21
 
 packages:
 - .
+
+extra-deps:
+- vector-sized-1.5.0@sha256:6b827805784b52ee9845ab5c930f627e6e27b6dea2354f6fc46295e63ccdb2ed,1758
