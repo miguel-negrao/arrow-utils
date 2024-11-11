@@ -1,6 +1,6 @@
 # README
 --------
-[![Build Status](https://travis-ci.com/miguel-negrao/arrow-utils.svg?branch=main)](https://travis-ci.com/miguel-negrao/arrow-utils)
+![Build Status](https://github.com/miguel-negrao/arrow-utils/actions/workflows/ci.yml/badge.svg)
 
 `arrow-utils` provides some useful functions and type classes for working with arrows.
 
