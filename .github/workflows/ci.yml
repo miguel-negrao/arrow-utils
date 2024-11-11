@@ -5,24 +5,21 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        ghc: ['8.8.4','8.10.7']
+        ghc: ['8.8.4','8.10.7','9.4.8','9.10.1']
         os: [ubuntu-latest]
-    name: Haskell GHC ${{ matrix.ghc }} cabal + stack
+    name: Haskell GHC ${{ matrix.ghc }} cabal
     env:
       cabal_project_freeze: cabal.project.${{ matrix.ghc }}.freeze
     steps:
-      - uses: actions/checkout@v2
-      - uses: haskell/actions/setup@v1.2.9
+      - uses: actions/checkout@v4
+      - uses: haskell-actions/setup@v2
         id: setup-haskell-build
         with:
           ghc-version: ${{ matrix.ghc }}
-          cabal-version: '3.6.2.0'
-          enable-stack: true
-          stack-version: '2.7'
       - name: Cabal update
         run: cabal update
       - name: Cache Cabal build artifacts
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: |
             ${{ steps.setup-haskell-build.outputs.cabal-store }}
@@ -39,10 +36,34 @@ jobs:
       - name: Cabal test
         run: |
           cabal test all --enable-tests --test-show-details=Always --project-file=cabal.project.${{ matrix.ghc }}
-      - name: Cache stack build artifacts
-        uses:  freckle/stack-cache-action@v1.0.1 
+  build-without-freeze:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        ghc: ['8.8.4','8.10.7','9.4.8','9.10.1']
+        os: [ubuntu-latest]
+    name: Haskell GHC ${{ matrix.ghc }} cabal without freeze
+    steps:
+      - uses: actions/checkout@v4
+      - uses: haskell-actions/setup@v2
+        id: setup-haskell-build
         with:
-          stack-yaml: stack.${{ matrix.ghc }}.yaml
-      - name: Stack build and test
+          ghc-version: ${{ matrix.ghc }}
+      - name: Cabal update
+        run: cabal update
+      - name: Cache Cabal build artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ steps.setup-haskell-build.outputs.cabal-store }}
+            dist-newstyle
+          key: ${{ runner.os }}-cabal-no-freeze-${{ matrix.ghc }}
+      - name: Cabal build dependencies
         run: |
-          stack build --system-ghc --test --stack-yaml stack.${{ matrix.ghc }}.yaml
+          cabal build all  --enable-tests --only-dependencies
+      - name: Cabal build packages
+        run: |
+          cabal build all --enable-tests
+      - name: Cabal test
+        run: |
+          cabal test all --enable-tests
