@@ -11,7 +11,7 @@ jobs:
     env:
       cabal_project_freeze: cabal.project.${{ matrix.ghc }}.freeze
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: haskell-actions/setup@v2
         id: setup-haskell-build
         with:
@@ -44,7 +44,7 @@ jobs:
         os: [ubuntu-latest]
     name: Haskell GHC ${{ matrix.ghc }} cabal without freeze
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: haskell-actions/setup@v2
         id: setup-haskell-build
         with:
